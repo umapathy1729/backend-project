@@ -29,8 +29,8 @@ pipeline {
                         git pull origin main
 
                         docker stop myap || true
-                        docker rm myapp || true
-                        docker rmi backend-image || true
+                        docker rm -f myapp || true
+                        docker rmi -f backend-image || true
 
                         docker build -t backend-image .
                         docker run -d -p 5000:5000 --name myapp backend-image
@@ -50,4 +50,3 @@ pipeline {
         }
     }
 }
-
