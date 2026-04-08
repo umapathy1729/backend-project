@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        EC2_IP = "13.127.17.124"
+        EC2_IP = "43.204.187.209"
     }
     stages {
         stage('Git checkout code') {
@@ -43,7 +43,7 @@ pipeline {
 
     post {
         success {
-            echo " Deplyment successful"
+            echo " Deployment successful"
         }
         failure {
             echo "Deployment failed"
