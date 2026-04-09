@@ -1,5 +1,5 @@
 pipeline {
-    agent any 
+    agent any
     environment {
         EC2_IP = "13.205.132.196"
     }
@@ -16,69 +16,37 @@ pipeline {
                 sshagent(['ec2_key']) {
                     sh '''
                     ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
-                    set -e
-                    rm -rf backend-project
-                    git clone git@github.com:umapathy1729/backend-project.git
-                    '
-                    '''
-                }
-            }    
-        }
-        stage('Git checkout') {
-            steps {
-                sshagent(['ec2_key']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
-                    set -e
-                    cd backend-project
-                    git checkout main
-                    git pull origin main
+                        set -e
+                        mkdir -p /home/ubuntu/apps
+                        cd /home/ubuntu/apps
 
+                        rm -rf backend-project
+
+                        git clone git@github.com:umapathy1729/backend-project.git
+
+                        cd backend-project
+                        git checkout main
+                        git pull origin main
+
+                        docker stop myap || true
+                        docker rm -f myapp || true
+                        docker rmi -f backend-image || true
+
+                        docker build -t backend-image .
+                        docker run -d -p 5000:5000 --name myapp backend-image
                     '
                     '''
                 }
             }
         }
-        stage('Removing old container') {
-            steps {
-                sshagent(['ec2_key']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
-                    set -e
-                    docker stop myapp || true
-                    docker rm -f myapp
-                    docker rmi backend-image ||true 
+    }
 
-                    '
-                    '''
-                }
-            }
+    post {
+        success {
+            echo " Deployment successful"
         }
-        stage('Building the container') {
-            steps {
-                sshagent(['ec2_key']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
-                    set -e
-                    docker build -t backend-image .
-
-                    '
-                    '''
-                }
-            }
-        }
-        stage('Running the container') {
-            steps {
-                sshagent(['ec2_key']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
-                    set -e
-                    docker run -d -p 5000:5000 --name myapp backend-image
-
-                    '
-                    '''
-                }
-            }
+        failure {
+            echo "Deployment failed"
         }
     }
 }
