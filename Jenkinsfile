@@ -28,7 +28,7 @@ pipeline {
             steps {
                 sshagent(['ec2_key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@${EC@_IP} '
+                    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
                     set -e
                     cd backend-project
                     git checkout main
@@ -43,7 +43,7 @@ pipeline {
             steps {
                 sshagent(['ec2_key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@${EC@_IP} '
+                    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
                     set -e
                     docker stop myapp || true
                     docker rm -f myapp
@@ -58,7 +58,7 @@ pipeline {
             steps {
                 sshagent(['ec2_key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@${EC@_IP} '
+                    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
                     set -e
                     docker build -t backend-image .
 
@@ -71,7 +71,7 @@ pipeline {
             steps {
                 sshagent(['ec2_key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@${EC@_IP} '
+                    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
                     set -e
                     docker run -d -p 5000:5000 --name myapp backend-image
 
