@@ -1,7 +1,7 @@
 pipeline {
     agent any 
     environment {
-        EC2_IP = "3.6.105.92"
+        EC2_IP = "13.205.132.196"
     }
     stages {
         stage('Git checkout code') {
