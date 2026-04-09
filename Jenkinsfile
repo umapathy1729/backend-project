@@ -1,7 +1,7 @@
 pipeline {
-    agent any
+    agent any 
     environment {
-        EC2_IP = "43.204.187.209"
+        EC2_IP = "3.6.105.92"
     }
     stages {
         stage('Git checkout code') {
@@ -16,37 +16,69 @@ pipeline {
                 sshagent(['ec2_key']) {
                     sh '''
                     ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
-                        set -e
-                        mkdir -p /home/ubuntu/apps
-                        cd /home/ubuntu/apps
+                    set -e
+                    rm -rf backend-project
+                    git clone git@github.com:umapathy1729/backend-project.git
+                    '
+                    '''
+                }
+            }    
+        }
+        stage('Git checkout') {
+            steps {
+                sshagent(['ec2_key']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@${EC@_IP} '
+                    set -e
+                    cd backend-project
+                    git checkout main
+                    git pull origin main
 
-                        rm -rf backend-project
-
-                        git clone git@github.com:umapathy1729/backend-project.git
-
-                        cd backend-project
-                        git checkout main
-                        git pull origin main
-
-                        docker stop myap || true
-                        docker rm -f myapp || true
-                        docker rmi -f backend-image || true
-
-                        docker build -t backend-image .
-                        docker run -d -p 5000:5000 --name myapp backend-image
                     '
                     '''
                 }
             }
         }
-    }
+        stage('Removing old container') {
+            steps {
+                sshagent(['ec2_key']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@${EC@_IP} '
+                    set -e
+                    docker stop myapp || true
+                    docker rm -f myapp
+                    docker rmi backend-image ||true 
 
-    post {
-        success {
-            echo " Deployment successful"
+                    '
+                    '''
+                }
+            }
         }
-        failure {
-            echo "Deployment failed"
+        stage('Building the container') {
+            steps {
+                sshagent(['ec2_key']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@${EC@_IP} '
+                    set -e
+                    docker build -t backend-image .
+
+                    '
+                    '''
+                }
+            }
+        }
+        stage('Running the container') {
+            steps {
+                sshagent(['ec2_key']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@${EC@_IP} '
+                    set -e
+                    docker run -d -p 5000:5000 --name myapp backend-image
+
+                    '
+                    '''
+                }
+            }
         }
     }
 }
