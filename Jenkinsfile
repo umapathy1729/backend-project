@@ -15,7 +15,7 @@ pipeline {
         stage('Deploy to ec2') {
 	    steps {
 		sshagent(['ec2_key_new']) {
-		    ssh '''
+		    sh '''
 		    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
 		    set -e
 		    rm -rf backend-project
