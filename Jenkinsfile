@@ -16,7 +16,7 @@ pipeline {
 	    steps {
 		sshagent(['ec2_key_new']) {
 		    ssh '''
-		    sh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
+		    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
 		    set -e
 		    rm -rf backend-project
 		    git clone git@github.com:umapathy1729/backend-project.git
